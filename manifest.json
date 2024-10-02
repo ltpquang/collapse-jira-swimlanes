@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Collapse Jira Swimlanes",
+  "version": "1.0",
+  "description": "Inject a custom button to collapse all Done swimlanes in Jira board",
+  "icons": {
+    "48": "icon.png"
+  },
+  "permissions": ["activeTab", "scripting"],
+  "content_scripts": [
+    {
+      "matches": ["https://*/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"]
+    }
+  ],
+  "action": {
+    "default_icon": {
+      "48": "icon.png"
+    },
+    "icon_attribute": "<a href=\"https://www.flaticon.com/free-icons/justification\" title=\"justification icons\">Justification icons created by Freepik - Flaticon</a>"
+  }
+}
