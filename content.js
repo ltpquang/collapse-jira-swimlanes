@@ -57,5 +57,6 @@ const observer = new MutationObserver((mutations) => {
 // Start observing the document for changes
 observer.observe(document.body, {childList: true, subtree: true});
 
-// Initial injection of the button
-injectButton();
+document.addEventListener("DOMContentLoaded", () => {
+  injectButton();
+});
