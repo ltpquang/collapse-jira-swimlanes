@@ -4,13 +4,9 @@ function collapseToggles() {
   const headings = document.querySelectorAll(".ghx-heading");
 
   headings.forEach(heading => {
-    const statusText = heading.querySelector(".jira-issue-status-lozenge")?.textContent?.toLowerCase();
-    const isDone = statusText?.includes("live") ||
-     statusText?.includes("done") ||
-     statusText?.includes("closed") ||
-     statusText?.includes("cancelled");
+    const doneElement = heading.querySelector(".jira-issue-status-lozenge-done")
 
-    if (isDone) {
+    if (doneElement) {
       // Find the toggle button within this heading
       const toggleButton = heading.querySelector(".aui-button.js-expander");
 
