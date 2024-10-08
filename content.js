@@ -23,9 +23,17 @@ function collapseToggles() {
 // Function to inject the custom button beside the "Board" button
 function injectButton() {
   const boardButton = document.querySelector("#board-tools-section-button");
-
   if (!boardButton) {
-    console.log("Board button not found!");
+    return;
+  }
+
+  const ghxWorkElement = document.querySelector("#ghx-work");
+  if (!ghxWorkElement || ghxWorkElement.children.length === 0) {
+    // Remove the custom button if it exists
+    const existingButton = document.querySelector(".aui-button[custom-button='true']");
+    if (existingButton) {
+      existingButton.remove();
+    }
     return;
   }
 
