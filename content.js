@@ -46,8 +46,13 @@ function injectButton() {
   // Add the click event listener to collapse the toggles when clicked
   newButton.addEventListener("click", collapseToggles);
 
-  // Insert the new button after the "Board" button
-  boardButton.parentNode.insertBefore(newButton, boardButton.nextSibling);
+  // Create a new div with class ghx-view-section and insert the button inside it
+  const newSection = document.createElement("div");
+  newSection.className = "ghx-view-section";
+  newSection.appendChild(newButton);
+
+  // Insert the new section after the board button's parent div
+  boardButton.parentNode.parentNode.insertBefore(newSection, boardButton.parentNode.nextSibling);
 }
 
 // Use MutationObserver to dynamically watch for changes in the DOM
