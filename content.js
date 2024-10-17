@@ -4,12 +4,17 @@ const handlers = [
     existed: existedCollapseButton,
     remover: removeCollapseButton,
     getter: getCollapseDoneButton,
+  },
+  {
+    shouldAvailable: shouldShowFilterColorButtonAvailable,
+    existed: existedFilterColorButton,
+    remover: removeFilterColorButton,
+    getter: getFilterColorButton,
   }
 ];
 
 function injectButtons() {
-  const boardButton = document.querySelector("#board-tools-section-button");
-  if (!boardButton) {
+  if (!document.querySelector("#jira")) {
     console.log("not a jira board");
     return; // not a jira board
   }
@@ -21,7 +26,8 @@ function injectButtons() {
 
   const existingSection = document.querySelector(".ghx-view-section[custom-buttons='true']");
   if (!existingSection) {
-    boardButton.parentNode.parentNode.insertBefore(newSection, boardButton.parentNode.nextSibling);
+    const pluggable = document.querySelector("#ghx-view-pluggable");
+    pluggable.appendChild(newSection);
   }
 
   for (let handler of handlers) {
@@ -31,6 +37,8 @@ function injectButtons() {
     } else if (!handler.existed(document)) {
       console.log("not existed");
       newSection.appendChild(handler.getter());
+    } else {
+      console.log("else");
     }
   }
 }
@@ -52,6 +60,6 @@ if (document.readyState === "loading") {
 
 function run() {
   const toObserve = document.querySelector("#ghx-view-selector");
-  observer.observe(toObserve, {childList: true, subtree: true});
+  observer.observe(document.body, {childList: true, subtree: true});
   injectButtons();
 }
