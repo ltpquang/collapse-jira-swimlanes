@@ -10,7 +10,7 @@
   "content_scripts": [
     {
       "matches": ["https://*/*"],
-      "js": ["content.js"],
+      "js": ["swimlanes/collapse-done.js", "content.js"],
       "css": ["styles.css"]
     }
   ],
