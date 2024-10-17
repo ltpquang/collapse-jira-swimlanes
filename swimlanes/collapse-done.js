@@ -1,4 +1,5 @@
-// Function to collapse the toggles based on the status
+let collapseDoneButton;
+
 function collapseToggles() {
   // Select all elements with class ghx-heading
   const headings = document.querySelectorAll(".ghx-heading");
@@ -20,52 +21,32 @@ function collapseToggles() {
   });
 }
 
-// Function to inject the custom button beside the "Board" button
-function injectButton() {
-  const boardButton = document.querySelector("#board-tools-section-button");
-  if (!boardButton) {
-    return;
-  }
-
+function shouldShowCollapseButtonAvailable(document) {
   const ghxWorkElement = document.querySelector("#ghx-work");
-  if (!ghxWorkElement || ghxWorkElement.children.length === 0) {
-    // Remove the custom button if it exists
-    const existingButton = document.querySelector(".aui-button[custom-button='true']");
-    if (existingButton) {
-      existingButton.remove();
-    }
-    return;
-  }
-
-  // Create the new button element
-  const newButton = document.createElement("button");
-  newButton.className = "aui-button";
-  newButton.setAttribute("custom-button", "true");
-  newButton.innerText = "Collapse all \"Done\"";
-
-  // Add the click event listener to collapse the toggles when clicked
-  newButton.addEventListener("click", collapseToggles);
-
-  // Create a new div with class ghx-view-section and insert the button inside it
-  const newSection = document.createElement("div");
-  newSection.className = "ghx-view-section";
-  newSection.appendChild(newButton);
-
-  // Insert the new section after the board button's parent div
-  boardButton.parentNode.parentNode.insertBefore(newSection, boardButton.parentNode.nextSibling);
+  return ghxWorkElement && ghxWorkElement.children.length !== 0;
 }
 
-function observe() {
-  const observer = new MutationObserver((mutations) => {
-    for (let mutation of mutations) {
-      if (mutation.type === 'childList') {
-        // Re-inject button if necessary (in case of page updates)
-        if (!document.querySelector(".aui-button[custom-button='true']")) {
-          injectButton();
-        }
-      }
-    }
-  });
+function existedCollapseButton(document) {
+  return document.querySelector(".aui-button[collapse-done='true']");
+}
 
-  observer.observe(document.body, {childList: true, subtree: true});
+function removeCollapseButton(document) {
+  const existingButton = document.querySelector(".aui-button[collapse-done='true']");
+  if (!existingButton) {
+    return;
+  }
+  existingButton.remove();
+}
+
+// Function to inject the custom button beside the "Board" button
+function getCollapseDoneButton() {
+  if (collapseDoneButton) {
+    return collapseDoneButton;
+  }
+  collapseDoneButton = document.createElement("button");
+  collapseDoneButton.className = "aui-button";
+  collapseDoneButton.setAttribute("collapse-done", "true");
+  collapseDoneButton.innerText = "Collapse all \"Done\"";
+  collapseDoneButton.addEventListener("click", collapseToggles);
+  return collapseDoneButton;
 }
