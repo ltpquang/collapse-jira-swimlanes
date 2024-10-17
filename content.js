@@ -59,7 +59,6 @@ if (document.readyState === "loading") {
 }
 
 function run() {
-  const toObserve = document.querySelector("#ghx-view-selector");
   observer.observe(document.body, {childList: true, subtree: true});
   injectButtons();
 }

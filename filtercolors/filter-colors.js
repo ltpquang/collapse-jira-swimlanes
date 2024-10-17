@@ -1,61 +1,85 @@
 let filterColorButton;
+let importantUrgentIssues;
+let importantNotUrgentIssues;
+let urgentNotImportantIssues;
+let notImportantNotUrgentIssues;
 
-async function filterColoring() {
+const coloringObserver = new MutationObserver((mutations) => {
+  for (let mutation of mutations) {
+    if (mutation.type === 'childList') {
+      console.log("observed");
+      coloring();
+    }
+  }
+});
+
+// Function to fetch issues by filter
+async function fetchIssues(urgentFilterId, importantFilterId) {
+  const jqlQuery = {
+    jql: `project = PCD-Cashier and sprint in openSprints() and (issuetype NOT IN (Sub-task, "Test Run")) and filter = ${urgentFilterId} and filter = ${importantFilterId}`,
+    startAt: 0,
+    maxResults: 100,
+    fields: ['key']
+  };
+
   // Get the current tab's host dynamically
   const currentHost = window.location.origin;
   const url = `${currentHost}/rest/api/2/search`;  // Use the current host in the API URL
 
-  // Function to fetch issues by filter
-  const fetchIssues = async (urgentFilterId, importantFilterId) => {
-    const jqlQuery = {
-      jql: `project = PCD-Cashier and sprint in openSprints() and (issuetype NOT IN (Sub-task, "Test Run")) and filter = ${urgentFilterId} and filter = ${importantFilterId}`,
-      startAt: 0,
-      maxResults: 100,
-      fields: ['key']
-    };
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(jqlQuery),
+    credentials: 'include'  // Include cookies from the current tab
+  });
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(jqlQuery),
-      credentials: 'include'  // Include cookies from the current tab
-    });
+  if (response.ok) {
+    const data = await response.json();
+    return data.issues.map(issue => issue.key);  // Return list of issue keys
+  } else {
+    console.error(`Failed to fetch issues for filters ${urgentFilterId} and ${importantFilterId}:`, response.status, response.statusText);
+    return [];
+  }
+}
 
-    if (response.ok) {
-      const data = await response.json();
-      return data.issues.map(issue => issue.key);  // Return list of issue keys
-    } else {
-      console.error(`Failed to fetch issues for filters ${urgentFilterId} and ${importantFilterId}:`, response.status, response.statusText);
-      return [];
-    }
-  };
-
-  // Fetch issues by categories
-  const importantUrgentIssues = await fetchIssues(26655, 26657);  // Important and Urgent
-  const importantNotUrgentIssues = await fetchIssues(26656, 26657);  // Important but Not Urgent
-  const urgentNotImportantIssues = await fetchIssues(26655, 26658);  // Urgent but Not Important
-  const notImportantNotUrgentIssues = await fetchIssues(26656, 26658);  // Not Important and Not Urgent
-
-  // Apply background colors based on category
+function coloring() {
+// Apply background colors based on category
   document.querySelectorAll('.js-issue').forEach(issueElement => {
     const issueKey = issueElement.getAttribute('data-issue-key');
     const badgeElement = issueElement.querySelector('.ghx-statistic-badge');  // Target the aui-badge
 
     if (!badgeElement) return;  // If there's no badge, skip it
 
-    if (importantUrgentIssues.includes(issueKey)) {
+    if (importantUrgentIssues && importantUrgentIssues.includes(issueKey)) {
       badgeElement.style.backgroundColor = '#BAF3DB';  // Important and Urgent
-    } else if (importantNotUrgentIssues.includes(issueKey)) {
+    } else if (importantNotUrgentIssues && importantNotUrgentIssues.includes(issueKey)) {
       badgeElement.style.backgroundColor = '#C6EDFB';  // Important but Not Urgent
-    } else if (urgentNotImportantIssues.includes(issueKey)) {
+    } else if (urgentNotImportantIssues && urgentNotImportantIssues.includes(issueKey)) {
       badgeElement.style.backgroundColor = '#F8E6A0';  // Urgent but Not Important
-    } else if (notImportantNotUrgentIssues.includes(issueKey)) {
+    } else if (notImportantNotUrgentIssues && notImportantNotUrgentIssues.includes(issueKey)) {
       badgeElement.style.backgroundColor = '#FFD5D2';  // Not Important and Not Urgent
     }
   });
+}
+
+async function filterColoring() {
+  // Get the current tab's host dynamically
+  const currentHost = window.location.origin;
+  const url = `${currentHost}/rest/api/2/search`;  // Use the current host in the API URL
+
+  // Fetch issues by categories
+  importantUrgentIssues = await fetchIssues(26655, 26657);  // Important and Urgent
+  importantNotUrgentIssues = await fetchIssues(26656, 26657);  // Important but Not Urgent
+  urgentNotImportantIssues = await fetchIssues(26655, 26658);  // Urgent but Not Important
+  notImportantNotUrgentIssues = await fetchIssues(26656, 26658);  // Not Important and Not Urgent
+
+  coloring();
+  coloringObserver.disconnect();
+  const node = document.querySelector(".ghx-sprint-group");
+  coloringObserver.observe(node, {childList: true, subtree: true});
 }
 
 function shouldShowFilterColorButtonAvailable(document) {
@@ -73,6 +97,7 @@ function removeFilterColorButton(document) {
     return;
   }
   existingButton.remove();
+  coloringObserver.disconnect();
 }
 
 // Function to inject the custom button beside the "Board" button
